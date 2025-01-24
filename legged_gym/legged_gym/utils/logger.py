@@ -90,91 +90,12 @@ class Logger:
                 a.plot(time, forces[:, i], label=f'force {i}')
         a.set(xlabel='time [s]', ylabel='Forces z [N]', title='Vertical Contact forces')
         a.legend()
-        # plot torque/vel curves
-        # a = axs[2, 1]
-        # if log["dof_vel"]!=[] and log["dof_torque"]!=[]: a.plot(log["dof_vel"], log["dof_torque"], 'x', label='measured')
-        # a.set(xlabel='Joint vel [rad/s]', ylabel='Joint Torque [Nm]', title='Torque/velocity curves')
-        # a.legend()
-        # plot torques
-        # a = axs[2, 2]
-        # if log["dof_torque"]!=[]: a.plot(time, log["dof_torque"], label='measured')
-        # a.set(xlabel='time [s]', ylabel='Joint Torque [Nm]', title='Torque')
-        # a.legend()
-        # plt.show()
 
-        # plot CPG r, theta
-        a = axs[2, 1]
-        # if log["cpg_r0"]!=[]: 
-        #     a.plot(time, log["cpg_r0"], label='r0')
-        #     # a.plot(time, log["cpg_th0"], label='th0')
-        #     a.plot(time, log["cpg_r1"], label='r1')
-        #     # a.plot(time, log["cpg_th1"], label='th1')
-        #     a.plot(time, log["cpg_r2"], label='r2')
-        #     # a.plot(time, log["cpg_th2"], label='th2')
-        #     a.plot(time, log["cpg_r3"], label='r3')
-        #     # a.plot(time, log["cpg_th3"], label='th3')
-        #     a.plot(time, log["cpg_r4"], label='r4')
-        #     a.plot(time, log["cpg_r5"], label='r5')
-        #     a.plot(time, log["cpg_r6"], label='r6')
-        #     a.plot(time, log["cpg_r7"], label='r7')
-        # a.set(xlabel='time [s]',title='CPG x 0') 
-        # a.legend()
 
         if log["veloVec"]!=[]:
             a.plot(time,log["veloVec"])
             a.set(xlabel='time [s]',title='All Amplitudes')
             a.legend() 
-
-        a = axs[2, 2]
-        # if log["cpg_dr0"]!=[]: 
-        #     a.plot(time, log["cpg_dr0"], label='dr0')
-        #     a.plot(time, log["cpg_dth0"], label='dth0')
-        # a.set(xlabel='time [s]',title='CPG x_dot 0')
-        # a.legend()
-        # if log["cpg_th0"]!=[]: 
-        #     a.plot(time, log["cpg_th0"], label='th0')
-        #     a.plot(time, log["cpg_th1"], label='th1')
-        #     a.plot(time, log["cpg_th2"], label='th2')
-        #     a.plot(time, log["cpg_th3"], label='th3')
-        #     a.plot(time, log["cpg_th4"], label='th4')
-        #     a.plot(time, log["cpg_th5"], label='th5')
-        #     a.plot(time, log["cpg_th6"], label='th6')
-        #     a.plot(time, log["cpg_th7"], label='th7')
-        # a.set(xlabel='time [s]',title='CPG x 0') 
-        # a.legend()
-
-        if log["cpg_theta"]!=[]:
-            a.plot(time,log["cpg_theta"])
-            a.set(xlabel='time [s]',title='All Phases')
-            a.legend() 
-
-        a = axs[1, 2]
-        # if log["cpg_psi0"]!=[]: 
-        #     a.plot(time, log["cpg_psi0"], label='psi0')
-        #     a.plot(time, log["cpg_dpsi0"], label='dpsi0')
-        # a.set(xlabel='time [s]',title='CPG PSI 0') 
-        # a.legend()
-
-        a = axs[1, 2]
-        if log["cpg_xoff0"]!=[]: 
-            a.plot(time, log["cpg_xoff0"], label='xoff0')
-            a.plot(time, log["cpg_xoff1"], label='xoff1')
-            a.plot(time, log["cpg_xoff2"], label='xoff2')
-            a.plot(time, log["cpg_xoff3"], label='xoff3')
-            a.plot(time, log["cpg_xoff4"], label='xoff4')
-            a.plot(time, log["cpg_xoff5"], label='xoff5')
-            a.plot(time, log["cpg_xoff6"], label='xoff6')
-            a.plot(time, log["cpg_xoff7"], label='xoff7')
-            a.set(xlabel='time [s]',title='CPG Xoff') 
-            a.legend()
-        elif log["actions"]!=[]:
-            a.plot(time,log["actions"])
-            a.set(xlabel='time [s]',title='Actions') 
-
-        plt.show()
-
-
-
 
         fig6 = plt.figure()
         plt.subplot(2, 2, 1)
@@ -211,70 +132,6 @@ class Logger:
         ax.set_ylabel('Base Velocity (m/s)')
         plt.show()
 
-        fig7 = plt.figure()
-        plt.subplot(2, 2, 1)
-        mil=plt.plot(time,log["omega1"])
-        plt.legend(iter(mil),('Little-Dog', 'Spot-Micro', 'Solo' ,'Mini-Cheetah'))
-        ax = plt.gca()
-        ax.set_xlabel('time (s)')
-        ax.set_ylabel('CPG Frequency (rad/s)')
-
-        plt.subplot(2, 2, 2)
-        mil=plt.plot(time,log["omega2"])
-        plt.legend(iter(mil),( 'A1', 'Go1', 'Aliengo' ,'Laikago'))
-        ax = plt.gca()
-        ax.set_xlabel('time (s)')
-        ax.set_ylabel('CPG Frequency (rad/s)')
-
-
-        plt.subplot(2, 2, 3)
-        mil=plt.plot(time,log["omega3"])
-        plt.legend(iter(mil),('Anymal-B', 'Anymal-C', 'Spot' ,'B1'))
-        ax = plt.gca()
-        ax.set_xlabel('time (s)')
-        ax.set_ylabel('CPG Frequency (rad/s)')
- 
-
-        plt.subplot(2, 2, 4)
-        mil=plt.plot(time,log["omega4"])
-        plt.legend(iter(mil),( 'HYQ', 'Dog 1', 'Dog 2' ,'Dog 3'))
-        ax = plt.gca()
-        ax.set_xlabel('time (s)')
-        ax.set_ylabel('CPG Frequency (rad/s)')
-        plt.legend()
-        plt.show()
-
-
-
-        fig7 = plt.figure()
-        plt.subplot(2, 2, 1)
-        mil=plt.plot(time,log["amplit1"])
-        plt.legend(iter(mil),('Little-Dog', 'Spot-Micro', 'Solo' ,'Mini-Cheetah'))
-        ax = plt.gca()
-        ax.set_xlabel('time (s)')
-        ax.set_ylabel('CPG Amplitude')
-
-        plt.subplot(2, 2, 2)
-        mil=plt.plot(time,log["amplit2"])
-        plt.legend(iter(mil),( 'A1', 'Go1', 'Aliengo' ,'Laikago'))
-        ax = plt.gca()
-        ax.set_xlabel('time (s)')
-        ax.set_ylabel('CPG Amplitude')
-
-        plt.subplot(2, 2, 3)
-        mil=plt.plot(time,log["amplit3"])
-        plt.legend(iter(mil),('Anymal-B', 'Anymal-C', 'Spot' ,'B1'))
-        ax = plt.gca()
-        ax.set_xlabel('time (s)')
-        ax.set_ylabel('CPG Amplitude')
-
-        plt.subplot(2, 2, 4)
-        mil=plt.plot(time,log["amplit4"])
-        plt.legend(iter(mil),( 'HYQ', 'Dog 1', 'Dog 2' ,'Dog 3'))
-        ax = plt.gca()
-        ax.set_xlabel('time (s)')
-        ax.set_ylabel('CPG Amplitude')
-        plt.show()
 
 
 

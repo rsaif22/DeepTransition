@@ -100,13 +100,23 @@ class BaselineLeggedRobotCfg(BaseConfig):
             'RR_calf_joint': -1.57,   # [rad]
         }
 
-    class control:
-        control_type = 'CPG_OFFSETX'
-        action_scale = 0.25
+    # class control:
+    #     control_type = 'CPG_OFFSETX'
+    #     action_scale = 0.25
 
-        decimation = 10
-        stiffness = {'joint': 100.}  # [N*m/rad]
-        damping = {'joint': 2.0}     # [N*m*s/rad]
+    #     decimation = 10
+    #     stiffness = {'joint': 100.}  # [N*m/rad]
+    #     damping = {'joint': 2.0}     # [N*m*s/rad]
+
+    class control:
+        # PD Drive parameters:
+        control_type = 'P'
+        stiffness = {'joint': 20.}  # [N*m/rad]
+        damping = {'joint': 0.5}     # [N*m*s/rad]
+        # action scale: target angle = actionScale * action + defaultAngle
+        action_scale = 0.25
+        # decimation: Number of control action updates @ sim DT per policy DT
+        decimation = 4
 
 
 

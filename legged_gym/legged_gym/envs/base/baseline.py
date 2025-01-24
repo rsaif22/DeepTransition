@@ -165,8 +165,6 @@ class Baseline(BaseTask):
         self._reset_root_states(env_ids)
 
         self._resample_commands(env_ids)
-        # if "CPG" in self.cfg.control.control_type:
-        #     self._cpg.reset(env_ids)
 
         # reset buffers
         self.last_base_pos[env_ids]= 0.
@@ -211,20 +209,15 @@ class Baseline(BaseTask):
         """ Computes observations
         """
         #print(self.max_vel.unsqueeze(1).size(), self.actions.size())
-        if "CPG" in self.cfg.control.control_type:
-            self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel, #3
-                                    self.base_ang_vel  * self.obs_scales.ang_vel, #3
-                                    self.projected_gravity, #3
-                                    self.commands[:, :3] * self.commands_scale, #3
-                                    (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos, #12
-                                    self.dof_vel * self.obs_scales.dof_vel, #12
-                                    self.actions, #12
-                                    self.contact_forces[:, self.feet_indices, 2] > 1., #4
-                                    # (self._cpg.X[:,0,:] - ((self._cpg.mu_up[0]+ self._cpg.mu_low[0]) / 2)) * self.obs_scales.dof_pos, #4
-                                    # (self._cpg.X[:,1,:] - np.pi) * 1/np.pi, #4
-                                    # self._cpg.X_dot[:,0,:] * 1/30, #4
-                                    # (self._cpg.X_dot[:,1,:] - 15) * 1/30, #4
-                                    ),dim=-1)
+        self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel, #3
+                                self.base_ang_vel  * self.obs_scales.ang_vel, #3
+                                self.projected_gravity, #3
+                                self.commands[:, :3] * self.commands_scale, #3
+                                (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos, #12
+                                self.dof_vel * self.obs_scales.dof_vel, #12
+                                self.actions, #12
+                                self.contact_forces[:, self.feet_indices, 2] > 1., #4
+                                ),dim=-1)
 
 
         if self.cfg.terrain.measure_heights:
@@ -375,7 +368,7 @@ class Baseline(BaseTask):
 
 
     def _compute_torques(self, actions):
-        """ Compute torques from CPG Signals (solve Inverse kinematics and run PD Control)
+        """ Compute torques from positions
         Args:
             actions (torch.Tensor): Actions
 
@@ -386,21 +379,6 @@ class Baseline(BaseTask):
         control_type = self.cfg.control.control_type
         normal_forces = self.contact_forces[:, self.feet_indices, 2] > 1.
 
-        # if "CPG" in control_type:
-        #     des_joint_pos = torch.zeros_like(self.torques,device=self.device)
-        #     xs,ys,zs = self._cpg.get_CPG_RL_actions(actions_scaled,self.frequency_high,self.frequency_low,normal_forces)
-        #     sideSign = np.array([-1,1,-1,1]) 
-
-        #     foot_y = torch.ones(self.num_envs,device=self.device,requires_grad=False) * self.cfg.asset.hip_link_length_a1
-        #     LEG_INDICES = np.array([1,0,3,2])
-        #     for ig_idx,i in enumerate(LEG_INDICES):
-        #         x = xs[:,i]
-        #         z = zs[:,i]
-        #         y = sideSign[i] * foot_y  + ys[:,i]
-        #         robot_length=self.cfg.asset
-        #         des_joint_pos[:, 3*ig_idx:3*ig_idx+3] = self._cpg.compute_inverse_kinematics(robot_length,i,x,y,z)
-        #     self.dof_des_pos = des_joint_pos
-        #     torques = self.p_gains*(self.dof_des_pos - self.dof_pos) - self.d_gains*self.dof_vel 
         if control_type=="P":
             torques = self.p_gains*(actions_scaled + self.default_dof_pos - self.dof_pos) - self.d_gains*self.dof_vel
         else:
@@ -547,10 +525,6 @@ class Baseline(BaseTask):
             self.height_points = self._init_height_points()
         self.measured_heights = 0
         self.rigid_body_state = gymtorch.wrap_tensor(rigid_body_state)[:self.num_envs * self.num_bodies, :]
- 
-        # if "CPG" in self.cfg.control.control_type:
-        #     # init CPG 
-        #     self._cpg = CPG_RL(time_step=self.sim_params.dt,num_envs=self.num_envs,device=self.device,rl_task_string=self.cfg.control.control_type)
 
         # joint positions offsets and PD gains
         self.default_dof_pos = torch.zeros(self.num_dof, dtype=torch.float, device=self.device, requires_grad=False)
