@@ -37,9 +37,8 @@ from legged_gym.utils.terrain import Terrain
 from legged_gym.utils.math import quat_apply_yaw, wrap_to_pi, torch_rand_sqrt_float
 from legged_gym.utils.helpers import class_to_dict
 from .legged_robot_config import LeggedRobotCfg
-from legged_gym.envs.base.CPG import CPG_RL
 
-class Quadruped(BaseTask):
+class Baseline(BaseTask):
     def __init__(self, cfg: LeggedRobotCfg, sim_params, physics_engine, sim_device, headless):
         """ Parses the provided config file,
             calls create_sim() (which creates, simulation, terrain and environments),
@@ -166,8 +165,8 @@ class Quadruped(BaseTask):
         self._reset_root_states(env_ids)
 
         self._resample_commands(env_ids)
-        if "CPG" in self.cfg.control.control_type:
-            self._cpg.reset(env_ids)
+        # if "CPG" in self.cfg.control.control_type:
+        #     self._cpg.reset(env_ids)
 
         # reset buffers
         self.last_base_pos[env_ids]= 0.
@@ -221,10 +220,10 @@ class Quadruped(BaseTask):
                                     self.dof_vel * self.obs_scales.dof_vel, #12
                                     self.actions, #12
                                     self.contact_forces[:, self.feet_indices, 2] > 1., #4
-                                    (self._cpg.X[:,0,:] - ((self._cpg.mu_up[0]+ self._cpg.mu_low[0]) / 2)) * self.obs_scales.dof_pos, #4
-                                    (self._cpg.X[:,1,:] - np.pi) * 1/np.pi, #4
-                                    self._cpg.X_dot[:,0,:] * 1/30, #4
-                                    (self._cpg.X_dot[:,1,:] - 15) * 1/30, #4
+                                    # (self._cpg.X[:,0,:] - ((self._cpg.mu_up[0]+ self._cpg.mu_low[0]) / 2)) * self.obs_scales.dof_pos, #4
+                                    # (self._cpg.X[:,1,:] - np.pi) * 1/np.pi, #4
+                                    # self._cpg.X_dot[:,0,:] * 1/30, #4
+                                    # (self._cpg.X_dot[:,1,:] - 15) * 1/30, #4
                                     ),dim=-1)
 
 
@@ -387,24 +386,25 @@ class Quadruped(BaseTask):
         control_type = self.cfg.control.control_type
         normal_forces = self.contact_forces[:, self.feet_indices, 2] > 1.
 
-        if "CPG" in control_type:
-            des_joint_pos = torch.zeros_like(self.torques,device=self.device)
-            xs,ys,zs = self._cpg.get_CPG_RL_actions(actions_scaled,self.frequency_high,self.frequency_low,normal_forces)
-            sideSign = np.array([-1,1,-1,1]) 
+        # if "CPG" in control_type:
+        #     des_joint_pos = torch.zeros_like(self.torques,device=self.device)
+        #     xs,ys,zs = self._cpg.get_CPG_RL_actions(actions_scaled,self.frequency_high,self.frequency_low,normal_forces)
+        #     sideSign = np.array([-1,1,-1,1]) 
 
-            foot_y = torch.ones(self.num_envs,device=self.device,requires_grad=False) * self.cfg.asset.hip_link_length_a1
-            LEG_INDICES = np.array([1,0,3,2])
-            for ig_idx,i in enumerate(LEG_INDICES):
-                x = xs[:,i]
-                z = zs[:,i]
-                y = sideSign[i] * foot_y  + ys[:,i]
-                robot_length=self.cfg.asset
-                des_joint_pos[:, 3*ig_idx:3*ig_idx+3] = self._cpg.compute_inverse_kinematics(robot_length,i,x,y,z)
-            self.dof_des_pos = des_joint_pos
-            torques = self.p_gains*(self.dof_des_pos - self.dof_pos) - self.d_gains*self.dof_vel 
+        #     foot_y = torch.ones(self.num_envs,device=self.device,requires_grad=False) * self.cfg.asset.hip_link_length_a1
+        #     LEG_INDICES = np.array([1,0,3,2])
+        #     for ig_idx,i in enumerate(LEG_INDICES):
+        #         x = xs[:,i]
+        #         z = zs[:,i]
+        #         y = sideSign[i] * foot_y  + ys[:,i]
+        #         robot_length=self.cfg.asset
+        #         des_joint_pos[:, 3*ig_idx:3*ig_idx+3] = self._cpg.compute_inverse_kinematics(robot_length,i,x,y,z)
+        #     self.dof_des_pos = des_joint_pos
+        #     torques = self.p_gains*(self.dof_des_pos - self.dof_pos) - self.d_gains*self.dof_vel 
+        if control_type=="P":
+            torques = self.p_gains*(actions_scaled + self.default_dof_pos - self.dof_pos) - self.d_gains*self.dof_vel
         else:
             raise NameError(f"Unknown controller type: {control_type}")
-        
         return torch.clip(torques, -self.torque_limits, self.torque_limits)
 
     def _reset_dofs(self, env_ids):
@@ -548,9 +548,9 @@ class Quadruped(BaseTask):
         self.measured_heights = 0
         self.rigid_body_state = gymtorch.wrap_tensor(rigid_body_state)[:self.num_envs * self.num_bodies, :]
  
-        if "CPG" in self.cfg.control.control_type:
-            # init CPG 
-            self._cpg = CPG_RL(time_step=self.sim_params.dt,num_envs=self.num_envs,device=self.device,rl_task_string=self.cfg.control.control_type)
+        # if "CPG" in self.cfg.control.control_type:
+        #     # init CPG 
+        #     self._cpg = CPG_RL(time_step=self.sim_params.dt,num_envs=self.num_envs,device=self.device,rl_task_string=self.cfg.control.control_type)
 
         # joint positions offsets and PD gains
         self.default_dof_pos = torch.zeros(self.num_dof, dtype=torch.float, device=self.device, requires_grad=False)

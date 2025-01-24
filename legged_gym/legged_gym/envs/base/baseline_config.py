@@ -23,10 +23,10 @@
 
 from .base_config import BaseConfig
 
-class LeggedRobotCfg(BaseConfig):
+class BaselineLeggedRobotCfg(BaseConfig):
     class env:
         num_envs = 2048
-        num_observations = 72-8+60+4 # x - y + height_field+ contact_forces + 
+        num_observations = 72-8+60+4-16 # Subtracting 16 from observation space to remove CPG observations
         num_privileged_obs = None # if not None a priviledge_obs_buf will be returned by step() (critic obs for assymetric training). None is returned otherwise 
         num_actions = 12 
         env_spacing = 3.  # not used with heightfields/trimeshes 
@@ -212,7 +212,7 @@ class LeggedRobotCfg(BaseConfig):
             default_buffer_size_multiplier = 5
             contact_collection = 2 # 0: never, 1: last sub-step, 2: all sub-steps (default=2)
 
-class LeggedRobotCfgPPO(BaseConfig):
+class BaselineLeggedRobotCfgPPO(BaseConfig):
     seed = 1
     runner_class_name = 'OnPolicyRunner'
     class policy:
@@ -243,7 +243,7 @@ class LeggedRobotCfgPPO(BaseConfig):
         max_iterations = 1500 # number of policy updates
         # logging
         save_interval = 50 # check for potential saves every this many iterations
-        experiment_name = 'quadruped' 
+        experiment_name = 'baseline_joint_control' 
         run_name = ''
         # load and resume
         resume = False
