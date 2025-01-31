@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+is_flat_global = True
 
 from .base_config import BaseConfig
 
@@ -60,6 +61,7 @@ class BaselineLeggedRobotCfg(BaseConfig):
         slope_treshold = 0.75 # slopes above this threshold will be corrected to vertical surfaces
         # mesh_type = 'plane'
         measure_heights = True
+        is_flat = is_flat_global
 
 
     class commands:
@@ -254,6 +256,8 @@ class BaselineLeggedRobotCfgPPO(BaseConfig):
         # logging
         save_interval = 50 # check for potential saves every this many iterations
         experiment_name = 'baseline_joint_control' 
+        if is_flat_global:
+            experiment_name += '_flat'
         run_name = ''
         # load and resume
         resume = False

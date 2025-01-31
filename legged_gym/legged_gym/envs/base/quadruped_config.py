@@ -23,6 +23,8 @@
 
 from .base_config import BaseConfig
 
+is_flat_global = True
+
 class LeggedRobotCfg(BaseConfig):
     class env:
         num_envs = 2048
@@ -60,6 +62,7 @@ class LeggedRobotCfg(BaseConfig):
         slope_treshold = 0.75 # slopes above this threshold will be corrected to vertical surfaces
         # mesh_type = 'plane'
         measure_heights = True
+        is_flat = is_flat_global
 
 
     class commands:
@@ -244,6 +247,8 @@ class LeggedRobotCfgPPO(BaseConfig):
         # logging
         save_interval = 50 # check for potential saves every this many iterations
         experiment_name = 'quadruped' 
+        if is_flat_global:
+            experiment_name += '_flat'
         run_name = ''
         # load and resume
         resume = False

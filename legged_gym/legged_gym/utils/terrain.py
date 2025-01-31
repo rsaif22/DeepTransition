@@ -18,6 +18,7 @@ class Terrain:
         self.env_length = cfg.terrain_length
         self.env_width = cfg.terrain_width
         self.proportions = [np.sum(cfg.terrain_proportions[:i+1]) for i in range(len(cfg.terrain_proportions))]
+        self.is_flat = cfg.is_flat
 
         self.cfg.num_sub_terrains = cfg.num_rows * cfg.num_cols
         self.env_origins = np.zeros((cfg.num_rows, cfg.num_cols, 3))
@@ -85,7 +86,7 @@ class Terrain:
                                 vertical_scale=self.cfg.vertical_scale,
                                 horizontal_scale=self.cfg.horizontal_scale)
         gap_size = 0.1 #* difficulty
-        gap_terrain(terrain, gap_size=gap_size, platform_size=3.)       
+        gap_terrain(terrain, gap_size=gap_size, platform_size=3., is_flat=self.is_flat)       
         return terrain
 
     def add_terrain_to_map(self, terrain, row, col):
@@ -107,7 +108,7 @@ class Terrain:
         env_origin_z = np.max(terrain.height_field_raw[x1:x2, y1:y2])*terrain.vertical_scale
         self.env_origins[i, j] = [env_origin_x, env_origin_y, env_origin_z]
 
-def gap_terrain(terrain, gap_size, platform_size=1.):
+def gap_terrain(terrain, gap_size, platform_size=1., is_flat=False):
     gap_size = 1# int(gap_size / terrain.horizontal_scale)
     platform_size = 1# int(platform_size / terrain.horizontal_scale)
 
@@ -118,10 +119,12 @@ def gap_terrain(terrain, gap_size, platform_size=1.):
     y1 = (terrain.width - platform_size) // 2
     y2 = y1 + gap_size
 
-    terrain.height_field_raw[center_x+32-3:center_x+37-3 , center_y-y2 : center_y + y2] = -7
-    terrain.height_field_raw[center_x+40-3:center_x+45-3 , center_y-y2 : center_y + y2] = -7  
-    terrain.height_field_raw[center_x+48-3:center_x+53-3 , center_y-y2 : center_y + y2] = -7
-    terrain.height_field_raw[center_x+56-3:center_x+63-3 , center_y-y2 : center_y + y2] = -7
-    terrain.height_field_raw[center_x-45 :center_x- 38, center_y-y2 : center_y + y2] = -7
-    terrain.height_field_raw[center_x-56 :center_x- 49, center_y-y2 : center_y + y2] = -7
+    if not is_flat:
+        terrain.height_field_raw[center_x+32-3:center_x+37-3 , center_y-y2 : center_y + y2] = -7
+        terrain.height_field_raw[center_x+40-3:center_x+45-3 , center_y-y2 : center_y + y2] = -7  
+        terrain.height_field_raw[center_x+48-3:center_x+53-3 , center_y-y2 : center_y + y2] = -7
+        terrain.height_field_raw[center_x+56-3:center_x+63-3 , center_y-y2 : center_y + y2] = -7
+        terrain.height_field_raw[center_x-45 :center_x- 38, center_y-y2 : center_y + y2] = -7
+        terrain.height_field_raw[center_x-56 :center_x- 49, center_y-y2 : center_y + y2] = -7
+
 
